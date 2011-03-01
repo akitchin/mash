@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Absolute location of the Mash library files
+DIRECTORY=$(cd `dirname $0` && pwd)
+
+# Checks if inside a Magento project
+
+# Performs action based on user arguments
+case $1 in
+  "create-module")
+    php -f $DIRECTORY/lib/create_module.php $2 $3
+    ;;
+  "clear-cache"|"cc")
+    php -f $DIRECTORY/lib/clear_cache.php
+    ;;
+  "help")
+    echo "clear-cache (cc)"
+    echo "create-module [package] [module]"
+    echo "help"
+    ;;
+  *)
+    echo "Use 'mash help' for a list of commands"
+    ;;
+esac
+
