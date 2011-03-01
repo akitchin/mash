@@ -72,6 +72,24 @@ function getPath($directory, $rootPath = FALSE) {
 }
 
 /**
+ * Looks for the package path under local.
+ *
+ * @param $package - the package path name
+ * @return the path to the specified package directory under app/code/local or 
+ *   FALSE if could not be found.
+ */
+function getPackagePath($package) {
+  $path = FALSE;
+
+  $localPath = getPath('local');
+  if ($localPath) {
+    $path = getPath($package, $localPath);
+  }
+
+  return $path;
+}
+
+/**
  * Wrapper for outputting a message to a user via STDOUT.
  *
  * @param $message - The string to prompt with
@@ -93,5 +111,21 @@ function in($message = FALSE) {
   }
 
   return trim(fgets(STDIN));
+}
+
+function formatXml($xml) {
+  // Loads the XSLT
+  $xslDoc = new DOMDocument();
+  $xslDoc->load(__DIR__ . "/format.xsl");
+
+  // Loads the XML
+  $xmlDoc = new DOMDocument();
+  $xmlDoc->loadXML($xml->asXML());
+
+  // Processes the XML
+  $proc = new XSLTProcessor();
+  $proc->importStylesheet($xslDoc);
+
+  return $proc->transformToXML($xmlDoc);
 }
 
