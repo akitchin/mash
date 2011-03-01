@@ -16,7 +16,7 @@ function clearCache() {
 
     // Clears the cache directory
     if ($cachePath) {
-      $command = "rm -r " . $cachePath . "*";
+      $command = "rm -rf " . $cachePath . "*";
       system($command);
     }
   }
