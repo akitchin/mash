@@ -24,10 +24,17 @@ in the Magento project directory).
    Example: `mash cc`
 
  * create-module [package] [module]
-   Creates a modules in app/code/local. Package and Module can be specified on
-   as an argument or be prompted for the names while running
+   Creates a modules in app/code/local. Package and Module can be specified as
+   an argument or be prompted for the names while running
 
    Example: `mash create-module MyPackage MyModule`
+
+ * create-route [package] [module] [area] [frontname]
+   Adds a route to the config.xml for the given module. Package, Module, the
+   area (like frontend), and frontname can be specified as an argument or be
+   prompted for the names while running
+
+   Example: `mash create-route MyPackage MyModule frontend mymodule`
 
  * help
    List of commands for mash

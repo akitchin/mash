@@ -10,12 +10,16 @@ case $1 in
   "create-module")
     php -f $DIRECTORY/lib/create_module.php $2 $3
     ;;
+  "create-route")
+    php -f $DIRECTORY/lib/create_route.php $2 $3 $4 $5
+    ;;
   "clear-cache"|"cc")
     php -f $DIRECTORY/lib/clear_cache.php
     ;;
   "help")
     echo "clear-cache (cc)"
     echo "create-module [package] [module]"
+    echo "create-route [package] [module] [area] [frontname]"
     echo "help"
     ;;
   *)

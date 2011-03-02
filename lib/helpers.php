@@ -90,6 +90,47 @@ function getPackagePath($package) {
 }
 
 /**
+ * Looks for the module path under package.
+ *
+ * @param $package - the package path name
+ * @param $module - the module path name
+ * @return the path to the specified module directory under app/code/local/<package> 
+ *   or FALSE if could not be found.
+ */
+function getModulePath($package, $module) {
+  $path = FALSE;
+
+  $packagePath = getPackagePath($package);
+  if ($packagePath) {
+    $path = getPath($module, $packagePath);
+  }
+
+  return $path;
+}
+
+/**
+ * Looks for the <package>/<module>/etc/config.xml file.
+ *
+ * @param $package - the package path name
+ * @param $module - the module path name
+ * @return the path to and including the config.xml file or FALSE if could not 
+ *   be found.
+ */
+function getConfigPath($package, $module) {
+  $path = FALSE;
+
+  $modulePath = getModulePath($package, $module);
+  if ($modulePath) {
+    $configPath = $modulePath . 'etc/config.xml';
+    if (file_exists($configPath)) {
+      $path = $configPath;
+    }
+  }
+
+  return $path;
+}
+
+/**
  * Wrapper for outputting a message to a user via STDOUT.
  *
  * @param $message - The string to prompt with
