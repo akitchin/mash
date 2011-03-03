@@ -24,7 +24,7 @@ function createRoute($package = FALSE, $module = FALSE, $area = FALSE, $frontNam
     $area = in('What is the Magento Area? Options are "frontend", "admin", and "install"');
   }
   if (!$frontName) {
-    $frontName = in('What is the Front Name? Often is the module name ("' . $module . '")');
+    $frontName = in('What is the Front Name? The Front Name is often the lowercase module name ("' . strtolower($module) . '")');
   }
 
   // Verify the module already exists
@@ -32,16 +32,21 @@ function createRoute($package = FALSE, $module = FALSE, $area = FALSE, $frontNam
   if ($configPath) {
     $xml = simplexml_load_file($configPath);
     if ($xml) {
-      $lowercaseModule = strtolower($module);
-
-      // Adds the route
-      $xml->addChild($area);
-      $xml->$area->addChild('routers');
-      $xml->$area->routers->addChild($lowercaseModule);
-      $xml->$area->routers->$lowercaseModule->addChild('use', 'standard');
-      $xml->$area->routers->$lowercaseModule->addChild('args');
-      $xml->$area->routers->$lowercaseModule->args->addChild('module', $package . '_' . $module);
-      $xml->$area->routers->$lowercaseModule->args->addChild('frontName', $frontName);
+      // Adds the area (frontend/admin/local)
+      if (empty($xml->$area)) {
+        $xml->addChild($area);
+      }
+      // Adds the route. Only adds if the route does not already exists (one 
+      // route per area).
+      if (empty($xml->$area->routers)) {
+        $lowercaseModule = strtolower($module);
+        $xml->$area->addChild('routers');
+        $xml->$area->routers->addChild($lowercaseModule);
+        $xml->$area->routers->$lowercaseModule->addChild('use', 'standard');
+        $xml->$area->routers->$lowercaseModule->addChild('args');
+        $xml->$area->routers->$lowercaseModule->args->addChild('module', $package . '_' . $module);
+        $xml->$area->routers->$lowercaseModule->args->addChild('frontName', $frontName);
+      }
       $formattedXml = formatXml($xml);
 
       // Writes file
