@@ -1,29 +1,37 @@
-#!/bin/bash
+#!/usr/bin/php
+<?php
+include_once('lib/helpers.php');
+include_once('lib/clear_cache.php');
+include_once('lib/Route.php');
+include_once('lib/Module.php');
 
-# Absolute location of the Mash library files
-DIRECTORY=$(cd `dirname $0` && pwd)
+// Must be ran inside a Magento project (subdirectories are okay)
+if (!getRootPath()) {
+  error('Mash needs to be ran inside a Magento project.');
+  exit;
+}
 
-# Checks if inside a Magento project
-
-# Performs action based on user arguments
-case $1 in
-  "create-module")
-    php -f $DIRECTORY/lib/create_module.php $2 $3
-    ;;
-  "create-route")
-    php -f $DIRECTORY/lib/create_route.php $2 $3 $4 $5
-    ;;
-  "clear-cache"|"cc")
-    php -f $DIRECTORY/lib/clear_cache.php
-    ;;
-  "help")
-    echo "clear-cache (cc)"
-    echo "create-module [package] [module]"
-    echo "create-route [package] [module] [area] [frontname]"
-    echo "help"
-    ;;
-  *)
-    echo "Use 'mash help' for a list of commands"
-    ;;
-esac
+switch ($argv[1]) {
+  case 'cc':
+  case 'clear-cache':
+    clearCache();
+    break;
+  case 'create-module':
+    $module = new Module();
+    $module->createModule($argv[2]);
+    break;
+  case 'create-route':
+    $route = new Route();
+    $route->createRoute($argv[2], $argv[3], $argv[4]);
+    break;
+  case 'help':
+    out('clear-cache (cc)');
+    out('create-module [module]');
+    out('create-route [module] [area] [frontname]');
+    out('help');
+    break;
+  default:
+    out('Use `mash help` for a list of commands.');
+    break;
+}
 

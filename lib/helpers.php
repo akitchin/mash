@@ -131,6 +131,15 @@ function getConfigPath($package, $module) {
 }
 
 /**
+ * Wrapper for outputting a message to a user via STDERR.
+ *
+ * @param $message - The string to prompt with
+ */
+function error($message = '') {
+  fwrite(STDERR, $message . "\n");
+}
+
+/**
  * Wrapper for outputting a message to a user via STDOUT.
  *
  * @param $message - The string to prompt with
