@@ -2,8 +2,9 @@
 <?php
 include_once('lib/helpers.php');
 include_once('lib/clear_cache.php');
-include_once('lib/Route.php');
+include_once('lib/Block.php');
 include_once('lib/Module.php');
+include_once('lib/Route.php');
 
 // Must be ran inside a Magento project (subdirectories are okay)
 if (!getRootPath()) {
@@ -16,6 +17,10 @@ switch ($argv[1]) {
   case 'clear-cache':
     clearCache();
     break;
+  case 'create-block':
+    $block = new Block();
+    $block->createBlock($argv[2], $argv[3]);
+    break;
   case 'create-module':
     $module = new Module();
     $module->createModule($argv[2]);
@@ -26,6 +31,7 @@ switch ($argv[1]) {
     break;
   case 'help':
     out('clear-cache (cc)');
+    out('create-block [block] [block to rewrite]');
     out('create-module [module]');
     out('create-route [module] [area] [frontname]');
     out('help');

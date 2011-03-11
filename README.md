@@ -8,7 +8,7 @@ The project is inspired by [drush](http://drupal.org/project/drush).
 
 ### Setup
 
-Mash is a Bash shell script executing various included PHP files to perform a
+Mash is a PHP shell script executing various included PHP files to perform a
 given task. To run mash, download or clone it to a directory in your bash
 include path. Or download it to a home directory and alias the mash file (like,
 `alias mash=/Users/baalexander/Development/mash/mash`.
