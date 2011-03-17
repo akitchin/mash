@@ -7,6 +7,7 @@ include_once('Module.php');
 class Block extends Module 
 {
   protected $block;
+  protected $blockPrefix;
   protected $blockShortname;
   protected $rewrite;
 
@@ -31,7 +32,7 @@ class Block extends Module
     }
 
     // Validates parameters
-    $components = explode('_', $block);
+    $components = explode('_', $this->block);
     if (count($components) < 5) {
       error('Block name needs to be fully qualified. Example: Package_Adminhtml_Block_Customer_Grid');
       return;
@@ -40,6 +41,8 @@ class Block extends Module
     $this->package         = $components[0];
     $this->module          = $components[1];
     $this->lowercaseModule = strtolower($this->module);
+    $this->packageModule   = $this->package . '_' . $this->module;
+    $this->blockPrefix     = substr($block, 0, strpos($block, 'Block_') + strlen('Block'));
     $this->blockShortname  = substr($block, strpos($block, 'Block_') + strlen('Block_'));
 
     // Verify the module already exists
@@ -63,8 +66,10 @@ class Block extends Module
     $xml = simplexml_load_file($configPath);
 
     if ($xml) {
-      $lowercaseModule = $this->lowercaseModule;
-      $blockShortname = $this->blockShortname;
+      $lowercaseModule         = $this->lowercaseModule;
+      $lowercasePackageModule  = strtolower($this->packageModule);
+      $blockShortname          = $this->blockShortname;
+      $lowercaseBlockShortname = strtolower($blockShortname);
 
       if (empty($xml->global)) {
         $xml->addChild('global');
@@ -73,19 +78,20 @@ class Block extends Module
         $xml->global->addChild('blocks');
       }
 
-      if (empty($xml->global->blocks->$lowercaseModule)) {
-        $xml->global->blocks->addChild($lowercaseModule);
+      if (empty($xml->global->blocks->$lowercasePackageModule)) {
+        $xml->global->blocks->addChild($lowercasePackageModule);
+        $xml->global->blocks->$lowercasePackageModule->addChild('class', $this->blockPrefix);
       }
 
-      // If no block to extend (rewrite) given, then creates as new block
-      if (empty($this->rewrite)) {
-
-      }
       // If block to extend given, then rewrites that block
-      else {
+      if (!empty($this->rewrite)) {
+        if (empty($xml->global->blocks->$lowercaseModule)) {
+          $xml->global->blocks->addChild($lowercaseModule);
+        }
+
         if (empty($xml->global->blocks->$lowercaseModule->rewrite->$blockShortname)) {
           $xml->global->blocks->$lowercaseModule->addChild('rewrite');
-          $xml->global->blocks->$lowercaseModule->rewrite->addChild($this->blockShortname, $this->block);
+          $xml->global->blocks->$lowercaseModule->rewrite->addChild($lowercaseBlockShortname, $this->block);
         }
       }
 
@@ -102,16 +108,30 @@ class Block extends Module
    * Creates the class file for the block.
    */
   protected function createBlockClass() {
-    // Checks if the block file exists
-
-    // If block to rewrite not specified, extends base html Block
-    $extends = $this->rewrite;
-    if (!$extends) {
-      $extends = 'Mage_Core_Block_Template';
+    // Creates the block directory if does not already exist
+    $localPath = getPath('local');
+    $directoryPath = $localPath;
+    $directories = explode('_', $this->block);
+    for ($i = 0; $i < count($directories) - 1; $i++) {
+      $directoryPath .= $directories[$i] . '/';
+    }
+    if (!file_exists($directoryPath)) {
+      mkdir($directoryPath, 0755, TRUE);
     }
 
-    // Code template
-    $code = <<<CODE
+    // Only create the class file if it does not already exists. Do not want to 
+    // overwrite an existing file.
+    $file = $directoryPath . $directories[count($directories) - 1] . '.php';
+    if (!file_exists($file)) {
+
+      // If block to rewrite not specified, extends base html Block
+      $extends = $this->rewrite;
+      if (!$extends) {
+        $extends = 'Mage_Core_Block_Template';
+      }
+
+      // Code template
+      $code = <<<CODE
 <?php
 
 class $this->block extends $extends {
@@ -121,7 +141,12 @@ class $this->block extends $extends {
 
 CODE;
 
-    out($code);
+      // Writes class file
+      $fileHandler = fopen($file, 'w');
+      fwrite($fileHandler, $code);
+      fclose($fileHandler);
+    }
   }
+
 }
 
